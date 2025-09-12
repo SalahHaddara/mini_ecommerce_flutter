@@ -62,4 +62,23 @@ class ProductProvider with ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<List<Product>> getLowStockProducts() async {
+    try {
+      return await _apiService.getLowStockProducts();
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      return [];
+    }
+  }
+
+  void clearError() {
+    _error = null;
+    notifyListeners();
+  }
+
+  void refreshProducts() {
+    loadProducts();
+  }
 }
