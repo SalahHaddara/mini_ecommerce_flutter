@@ -55,9 +55,23 @@ class ApiService {
     }
   }
 
+  // Auth endpoints
   Future<Map<String, dynamic>> register(String email, String password) async {
     final response = await http.post(
       Uri.parse('${ApiConstants.baseUrl}${ApiConstants.registerEndpoint}'),
+      headers: _headers,
+      body: json.encode({
+        'email': email,
+        'password': password,
+      }),
+    );
+
+    return await _handleResponse(response);
+  }
+
+  Future<Map<String, dynamic>> login(String email, String password) async {
+    final response = await http.post(
+      Uri.parse('${ApiConstants.baseUrl}${ApiConstants.loginEndpoint}'),
       headers: _headers,
       body: json.encode({
         'email': email,
