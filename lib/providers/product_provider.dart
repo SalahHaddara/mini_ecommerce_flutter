@@ -30,4 +30,36 @@ class ProductProvider with ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<bool> createProduct({
+    required String name,
+    required double price,
+    required int stock,
+    String? description,
+    String? imageUrl,
+  }) async {
+    _isLoading = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final newProduct = await _apiService.createProduct(
+        name: name,
+        price: price,
+        stock: stock,
+        description: description,
+        imageUrl: imageUrl,
+      );
+
+      _products.add(newProduct);
+      _error = null;
+      return true;
+    } catch (e) {
+      _error = e.toString();
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 }
