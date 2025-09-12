@@ -133,4 +133,62 @@ class AuthService {
       debugPrint('[AuthService] init: email=${_currentUser?.email} role=${_currentUser?.role} isAdmin=$isAdmin');
     }
   }
+
+  Future<Map<String, dynamic>> register(String email, String password) async {
+    try {
+      final response = await _apiService.register(email, password);
+
+      return await login(email, password);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<Map<String, dynamic>> login(String email, String password) async {
+    try {
+      final response = await _apiService.login(email, password);
+
+      _token = response['token'] ?? response['accessToken'] ?? response['jwt'];
+      if (_token == null) {
+        throw Exception('No token returned from server');
+      }
+
+      debugPrint(
+          '[AuthService] login response: email=${response['email']} role=${response['role']} tokenLen=${_token!.length}');
+
+      if (response['user'] != null) {
+        _currentUser = User.fromJson(response['user']);
+      } else if (response['email'] != null || response['role'] != null) {
+        final String emailFromResponse = (response['email'] ?? '').toString();
+        final String? roleFromResponse = (response['role'] as String?)?.toLowerCase();
+        _currentUser = User(
+          id: emailFromResponse.isNotEmpty ? emailFromResponse : 'unknown',
+          email: emailFromResponse,
+          role: roleFromResponse,
+        );
+      } else {
+        final payload = _decodeJwtPayload(_token!);
+        debugPrint('[AuthService] login: jwt payload=$payload');
+        _currentUser = payload != null ? _buildUserFromTokenPayload(payload) : null;
+      }
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(AppConstants.tokenKey, _token!);
+      if (_currentUser != null) {
+        await prefs.setString(AppConstants.userKey, json.encode(_currentUser!.toJson()));
+      } else {
+        await prefs.remove(AppConstants.userKey);
+      }
+
+      _apiService.setToken(_token!);
+
+      await _probeAndSetAdminIfAllowed();
+
+      debugPrint('[AuthService] login: email=${_currentUser?.email} role=${_currentUser?.role} isAdmin=$isAdmin');
+
+      return response;
+    } catch (e) {
+      rethrow;
+    }
+  }
 }
