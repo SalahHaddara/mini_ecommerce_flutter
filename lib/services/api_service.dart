@@ -96,4 +96,27 @@ class ApiService {
       throw Exception('Failed to load products: \\${response.body}');
     }
   }
+
+  Future<Product> createProduct({
+    required String name,
+    required double price,
+    required int stock,
+    String? description,
+    String? imageUrl,
+  }) async {
+    final response = await http.post(
+      Uri.parse('${ApiConstants.baseUrl}${ApiConstants.productsEndpoint}'),
+      headers: _headers,
+      body: json.encode({
+        'name': name,
+        'price': price,
+        'stock': stock,
+        'description': description,
+        'imageUrl': imageUrl,
+      }),
+    );
+
+    final data = await _handleResponse(response);
+    return Product.fromJson(data);
+  }
 }
