@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/auth_provider.dart';
+import '../providers/theme_provider.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -37,8 +38,8 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<AuthProvider>(
-      builder: (context, authProvider, child) {
+    return Consumer2<AuthProvider, ThemeProvider>(
+      builder: (context, authProvider, themeProvider, child) {
         final email = authProvider.user?.email ?? 'Unknown';
         final role = authProvider.isAdmin ? 'Admin' : 'User';
 
@@ -77,6 +78,51 @@ class ProfileScreen extends StatelessWidget {
                       ],
                     ),
                   ],
+                ),
+                const SizedBox(height: 32),
+                const Divider(),
+                const SizedBox(height: 16),
+                // Theme Mode Toggle
+                ListTile(
+                  leading: const Icon(Icons.brightness_6),
+                  title: const Text('Theme'),
+                  subtitle: Text(
+                    themeProvider.themeMode == ThemeMode.system
+                        ? 'System'
+                        : themeProvider.themeMode == ThemeMode.dark
+                            ? 'Dark'
+                            : 'Light',
+                  ),
+                  trailing: DropdownButton<ThemeMode>(
+                    value: themeProvider.themeMode,
+                    items: const [
+                      DropdownMenuItem(
+                        value: ThemeMode.system,
+                        child: Text('System'),
+                      ),
+                      DropdownMenuItem(
+                        value: ThemeMode.light,
+                        child: Text('Light'),
+                      ),
+                      DropdownMenuItem(
+                        value: ThemeMode.dark,
+                        child: Text('Dark'),
+                      ),
+                    ],
+                    onChanged: (mode) {
+                      if (mode != null) {
+                        themeProvider.setThemeMode(mode);
+                      }
+                    },
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Divider(),
+                const SizedBox(height: 8),
+                ListTile(
+                  leading: const Icon(Icons.logout),
+                  title: const Text('Logout'),
+                  onTap: () => _confirmAndLogout(context),
                 ),
               ],
             ),
