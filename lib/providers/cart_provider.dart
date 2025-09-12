@@ -34,4 +34,22 @@ class CartProvider with ChangeNotifier {
     }
     notifyListeners();
   }
+
+  void removeItem(String productId) {
+    _items.removeWhere((item) => item.product.id == productId);
+    notifyListeners();
+  }
+
+  void updateQuantity(String productId, int quantity) {
+    if (quantity <= 0) {
+      removeItem(productId);
+      return;
+    }
+
+    final index = _items.indexWhere((item) => item.product.id == productId);
+    if (index >= 0) {
+      _items[index].quantity = quantity;
+      notifyListeners();
+    }
+  }
 }
