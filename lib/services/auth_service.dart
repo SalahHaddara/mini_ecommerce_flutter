@@ -1,6 +1,6 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../constants/app_constants.dart';
@@ -24,6 +24,7 @@ class AuthService {
   String? get token => _token;
 
   bool get isAuthenticated => _token != null;
+
   bool get isAdmin => _currentUser?.isAdmin ?? _isAdminOverride;
 
   Future<void> _probeAndSetAdminIfAllowed() async {
@@ -190,6 +191,17 @@ class AuthService {
     } catch (e) {
       rethrow;
     }
+  }
+
+  Future<void> logout() async {
+    _token = null;
+    _currentUser = null;
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(AppConstants.tokenKey);
+    await prefs.remove(AppConstants.userKey);
+
+    _apiService.clearToken();
   }
 
   Future<void> refreshToken() async {
