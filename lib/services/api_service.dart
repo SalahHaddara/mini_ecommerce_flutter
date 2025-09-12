@@ -34,4 +34,24 @@ class ApiService {
 
     return headers;
   }
+
+  Future<Map<String, dynamic>> _handleResponse(http.Response response) async {
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      if (response.body.isEmpty) {
+        return {};
+      }
+      final decoded = json.decode(response.body);
+      if (decoded is Map<String, dynamic>) {
+        return decoded;
+      } else {
+        throw Exception('Expected a Map but got \\${decoded.runtimeType}: \\${decoded.toString()}');
+      }
+    } else if (response.statusCode == 401) {
+      clearToken();
+      throw Exception('Unauthorized - Please login again');
+    } else {
+      final errorBody = response.body.isNotEmpty ? json.decode(response.body) : {'message': 'Unknown error occurred'};
+      throw Exception(errorBody['message'] ?? 'Request failed');
+    }
+  }
 }
