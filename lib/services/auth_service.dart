@@ -1,7 +1,9 @@
 import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
 
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../constants/app_constants.dart';
 import '../models/user.dart';
 import 'api_service.dart';
 
@@ -22,7 +24,6 @@ class AuthService {
   String? get token => _token;
 
   bool get isAuthenticated => _token != null;
-
   bool get isAdmin => _currentUser?.isAdmin ?? _isAdminOverride;
 
   Future<void> _probeAndSetAdminIfAllowed() async {
@@ -58,5 +59,43 @@ class AuthService {
     } catch (_) {
       return null;
     }
+  }
+
+  User? _buildUserFromTokenPayload(Map<String, dynamic> payload) {
+    final dynamic rawEmail = payload['email'] ?? payload['sub'] ?? payload['user_name'];
+    final String? email = rawEmail?.toString();
+
+    String? detectedRole;
+    final dynamic roleClaim = payload['role'];
+    final dynamic rolesClaim = payload['roles'] ?? payload['authorities'] ?? payload['scope'];
+
+    bool hasAdminSignal(dynamic value) {
+      if (value == null) return false;
+      if (value is String) {
+        final v = value.toLowerCase();
+        return v.contains('admin');
+      }
+      if (value is List) {
+        return value.any((e) => e.toString().toLowerCase().contains('admin'));
+      }
+      return false;
+    }
+
+    if (hasAdminSignal(roleClaim) || hasAdminSignal(rolesClaim)) {
+      detectedRole = 'admin';
+    } else {
+      detectedRole = 'user';
+    }
+
+    final dynamic rawId = payload['userId'] ?? payload['id'] ?? payload['uid'];
+    final String id = (rawId ?? '').toString();
+
+    if (email == null || email.isEmpty) return null;
+
+    return User(
+      id: id.isEmpty ? email : id,
+      email: email,
+      role: detectedRole,
+    );
   }
 }
