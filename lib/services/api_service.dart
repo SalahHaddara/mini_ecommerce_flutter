@@ -172,4 +172,18 @@ class ApiService {
       throw Exception('Failed to load orders: \\${response.body}');
     }
   }
+
+  Future<List<Order>> getAllOrders() async {
+    final response = await http.get(
+      Uri.parse('${ApiConstants.baseUrl}${ApiConstants.adminOrdersEndpoint}'),
+      headers: _headers,
+    );
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => Order.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to load orders: \\${response.body}');
+    }
+  }
 }
