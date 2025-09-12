@@ -98,4 +98,39 @@ class AuthService {
       role: detectedRole,
     );
   }
+
+  Future<void> initialize() async {
+    final prefs = await SharedPreferences.getInstance();
+    _token = prefs.getString(AppConstants.tokenKey);
+
+    if (_token != null) {
+      _apiService.setToken(_token!);
+      final userJson = prefs.getString(AppConstants.userKey);
+      if (userJson != null) {
+        try {
+          final userMap = json.decode(userJson) as Map<String, dynamic>;
+          _currentUser = User.fromJson(userMap);
+        } catch (e) {
+          await prefs.remove(AppConstants.userKey);
+          _currentUser = null;
+        }
+      }
+
+      if (_currentUser == null) {
+        final payload = _decodeJwtPayload(_token!);
+        debugPrint('[AuthService] init: jwt payload=$payload');
+        if (payload != null) {
+          final derivedUser = _buildUserFromTokenPayload(payload);
+          if (derivedUser != null) {
+            _currentUser = derivedUser;
+            await prefs.setString(AppConstants.userKey, json.encode(_currentUser!.toJson()));
+          }
+        }
+      }
+
+      await _probeAndSetAdminIfAllowed();
+
+      debugPrint('[AuthService] init: email=${_currentUser?.email} role=${_currentUser?.role} isAdmin=$isAdmin');
+    }
+  }
 }
