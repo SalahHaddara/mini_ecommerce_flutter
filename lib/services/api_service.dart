@@ -186,4 +186,18 @@ class ApiService {
       throw Exception('Failed to load orders: \\${response.body}');
     }
   }
+
+  Future<List<Product>> getLowStockProducts() async {
+    final response = await http.get(
+      Uri.parse('${ApiConstants.baseUrl}${ApiConstants.adminLowStockEndpoint}'),
+      headers: _headers,
+    );
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => Product.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to load low stock products: ${response.body}');
+    }
+  }
 }
