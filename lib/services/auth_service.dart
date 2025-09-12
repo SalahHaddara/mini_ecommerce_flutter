@@ -191,4 +191,10 @@ class AuthService {
       rethrow;
     }
   }
+
+  Future<void> refreshToken() async {
+    if (_token == null) {
+      throw Exception('No token to refresh');
+    }
+  }
 }
