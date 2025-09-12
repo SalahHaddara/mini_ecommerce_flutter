@@ -72,4 +72,30 @@ class CartProvider with ChangeNotifier {
       notifyListeners();
     }
   }
+
+  int getQuantity(String productId) {
+    final item = _items.firstWhere(
+      (item) => item.product.id == productId,
+      orElse: () => CartItem(product: Product(id: '', name: '', price: 0, stock: 0), quantity: 0),
+    );
+    return item.quantity;
+  }
+
+  bool isInCart(String productId) {
+    return _items.any((item) => item.product.id == productId);
+  }
+
+  void clear() {
+    _items.clear();
+    notifyListeners();
+  }
+
+  List<Map<String, dynamic>> toOrderItems() {
+    return _items
+        .map((item) => {
+              'productId': item.product.id,
+              'quantity': item.quantity,
+            })
+        .toList();
+  }
 }
