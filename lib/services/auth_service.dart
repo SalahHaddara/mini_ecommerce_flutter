@@ -1,6 +1,6 @@
 import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
+
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../constants/app_constants.dart';
@@ -24,7 +24,6 @@ class AuthService {
   String? get token => _token;
 
   bool get isAuthenticated => _token != null;
-
   bool get isAdmin => _currentUser?.isAdmin ?? _isAdminOverride;
 
   Future<void> _probeAndSetAdminIfAllowed() async {
