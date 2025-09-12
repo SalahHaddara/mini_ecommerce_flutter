@@ -119,4 +119,18 @@ class ApiService {
     final data = await _handleResponse(response);
     return Product.fromJson(data);
   }
+
+  Future<Product> getProductById(String id) async {
+    final response = await http.get(
+      Uri.parse('${ApiConstants.baseUrl}${ApiConstants.productsEndpoint}/$id'),
+      headers: _headers,
+    );
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      final data = json.decode(response.body);
+      return Product.fromJson(data);
+    } else {
+      throw Exception('Failed to load product: ${response.body}');
+    }
+  }
 }
