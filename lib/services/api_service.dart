@@ -133,4 +133,29 @@ class ApiService {
       throw Exception('Failed to load product: ${response.body}');
     }
   }
+
+  // Order endpoints
+  Future<Order> createOrder(List<Map<String, dynamic>> items) async {
+    final response = await http.post(
+      Uri.parse('${ApiConstants.baseUrl}${ApiConstants.ordersEndpoint}'),
+      headers: _headers,
+      body: json.encode({
+        'items': items,
+      }),
+    );
+
+    if (response.statusCode >= 200 && response.statusCode < 300) {
+      if (response.body.isEmpty) {
+        throw Exception('Order creation failed: empty response from server');
+      }
+      final data = json.decode(response.body);
+      if (data is Map<String, dynamic>) {
+        return Order.fromJson(data);
+      } else {
+        throw Exception('Order creation failed: unexpected response type: ${data.runtimeType}');
+      }
+    } else {
+      throw Exception('Order creation failed: ${response.body}');
+    }
+  }
 }
