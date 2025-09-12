@@ -52,4 +52,24 @@ class CartProvider with ChangeNotifier {
       notifyListeners();
     }
   }
+
+  void incrementQuantity(String productId) {
+    final index = _items.indexWhere((item) => item.product.id == productId);
+    if (index >= 0) {
+      _items[index].quantity++;
+      notifyListeners();
+    }
+  }
+
+  void decrementQuantity(String productId) {
+    final index = _items.indexWhere((item) => item.product.id == productId);
+    if (index >= 0) {
+      if (_items[index].quantity > 1) {
+        _items[index].quantity--;
+      } else {
+        removeItem(productId);
+      }
+      notifyListeners();
+    }
+  }
 }
