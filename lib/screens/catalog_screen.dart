@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
-
 import '../providers/product_provider.dart';
-import '../widgets/empty_state.dart';
+import '../providers/cart_provider.dart';
+import '../models/product.dart';
+import '../widgets/loading_widget.dart';
 import '../widgets/error_widget.dart';
+import '../widgets/empty_state.dart';
+import 'product_details_screen.dart';
 
 class CatalogScreen extends StatefulWidget {
   const CatalogScreen({super.key});
@@ -55,7 +58,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
       body: Consumer<ProductProvider>(
         builder: (context, productProvider, child) {
           if (productProvider.isLoading && productProvider.products.isEmpty) {
-            return const Center(child: CircularProgressIndicator());
+            return _isGridView ? const ShimmerGrid() : const ShimmerList();
           }
 
           if (productProvider.error != null && productProvider.products.isEmpty) {
@@ -76,10 +79,54 @@ class _CatalogScreenState extends State<CatalogScreen> {
           return SmartRefresher(
             controller: _refreshController,
             onRefresh: _onRefresh,
-            child: const Center(child: Text("Products loaded")),
+            child: _isGridView ? _buildGridView(productProvider.products) : _buildListView(productProvider.products),
           );
         },
       ),
+    );
+  }
+
+  Widget _buildGridView(List<Product> products) {
+    return GridView.builder(
+      padding: const EdgeInsets.all(16),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        childAspectRatio: 0.7,
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
+      ),
+      itemCount: products.length,
+      itemBuilder: (context, index) => _ProductCard(
+        product: products[index],
+        onTap: () => _navigateToProductDetails(products[index]),
+      ),
+    );
+  }
+
+  void _navigateToProductDetails(Product product) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => ProductDetailsScreen(product: product),
+      ),
+    );
+  }
+}
+
+class ShimmerGrid extends StatelessWidget {
+  const ShimmerGrid({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return GridView.builder(
+      padding: const EdgeInsets.all(16),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        childAspectRatio: 0.7,
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
+      ),
+      itemCount: 6,
+      itemBuilder: (context, index) => const ShimmerCard(),
     );
   }
 }
