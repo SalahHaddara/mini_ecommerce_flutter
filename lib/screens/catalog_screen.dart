@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 import '../providers/product_provider.dart';
 import '../widgets/empty_state.dart';
@@ -13,6 +14,7 @@ class CatalogScreen extends StatefulWidget {
 }
 
 class _CatalogScreenState extends State<CatalogScreen> {
+  final RefreshController _refreshController = RefreshController(initialRefresh: false);
   bool _isGridView = true;
 
   @override
@@ -21,6 +23,17 @@ class _CatalogScreenState extends State<CatalogScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<ProductProvider>(context, listen: false).loadProducts();
     });
+  }
+
+  @override
+  void dispose() {
+    _refreshController.dispose();
+    super.dispose();
+  }
+
+  void _onRefresh() async {
+    await Provider.of<ProductProvider>(context, listen: false).loadProducts();
+    _refreshController.refreshCompleted();
   }
 
   @override
@@ -60,8 +73,11 @@ class _CatalogScreenState extends State<CatalogScreen> {
             );
           }
 
-          // Placeholder for now
-          return const Center(child: Text("Products loaded"));
+          return SmartRefresher(
+            controller: _refreshController,
+            onRefresh: _onRefresh,
+            child: const Center(child: Text("Products loaded")),
+          );
         },
       ),
     );
