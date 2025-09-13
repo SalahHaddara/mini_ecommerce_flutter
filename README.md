@@ -1,16 +1,58 @@
-# mini_ecommerce_flutter
+# Mini Ecommerce Flutter App
 
-Mini e-commerece flutter project
+A Flutter e-commerce app with user and admin functionality, built with Material 3, Provider, and clean architecture.
 
-## Getting Started
+## Features
 
-This project is a starting point for a Flutter application.
+### User
 
-A few resources to get you started if this is your first Flutter project:
+* Authentication (register/login)
+* Product catalog & details
+* Shopping cart with totals & tax
+* Order placement & history
+* Responsive UI with loading/error states
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+### Admin
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+* Add & manage products
+* View/manage all orders
+* Low stock monitoring (<5 items)
+* Dashboard with tabbed navigation
+
+## Tech Stack
+
+* **Flutter** (null-safe Dart)
+* **Provider** (state management)
+* **HTTP** (API communication)
+* **SharedPreferences** (token persistence)
+* **form\_validator**, **shimmer**, **pull\_to\_refresh**
+
+## Setup
+
+1. Clone repo & install deps
+
+   ```bash
+   git clone
+   cd mini_ecommerce
+   flutter pub get
+   ```
+2. Update API URL in `lib/constants/api_constants.dart`
+3. Run the app:
+
+   ```bash
+   flutter run
+   ```
+
+## Testing
+
+```bash
+flutter test
+```
+
+## Future Improvements
+
+* Offline support & sync
+* Image upload for products
+* Push notifications
+* Search & filters
+* Dark mode & i18n
